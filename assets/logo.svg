@@ -3,6 +3,6 @@
   <circle cx="15" cy="19" r="4.2" fill="#FFFFFF"/>
   <circle cx="29" cy="19" r="4.2" fill="#FFFFFF"/>
   <path d="M12 29 Q22 36 32 29" stroke="#FFFFFF" stroke-width="3.4" fill="none" stroke-linecap="round"/>
-  <text x="56" y="21" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#4F46E5" stroke="#FFFFFF" stroke-width="0.6" paint-order="stroke fill">ThinkLab Sentiment</text>
-  <text x="56" y="39" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#60A5FA">Analyzer</text>
+  <text x="56" y="21" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#0284C7">ThinkLab Sentiment</text>
+  <text x="56" y="39" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#2F66FF">Analyzer</text>
 </svg>
