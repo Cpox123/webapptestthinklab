@@ -273,20 +273,9 @@ st.subheader("Dataset Information")
 
 col1, col2, col3 = st.columns(3)
 
-col1.metric(
-    "Total Reviews",
-    len(df),
-)
-
-col2.metric(
-    "Valid Reviews",
-    valid_count,
-)
-
-col3.metric(
-    "Empty Reviews",
-    empty_count,
-)
+col1.metric("Total Reviews", len(df), border=True)
+col2.metric("Valid Reviews", valid_count, border=True)
+col3.metric("Empty Reviews", empty_count, border=True)
 
 
 if empty_count > 0:
