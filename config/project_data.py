@@ -4,7 +4,7 @@ PROJECT_TITLE = "NLP-based Product Review Sentiment Classification System"
 # Branding
 # --------------------------------------------------
 
-APP_NAME = "NLP Sentiment Analyzer"
+APP_NAME = "ThinkLab Sentiment Analyzer"
 GROUP_NAME = "ThinkLab Team "
 COURSE = "CCS3356 Natural Language Processing"
 COPYRIGHT_YEAR = "2026"
