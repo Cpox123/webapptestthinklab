@@ -111,7 +111,7 @@ for col, member in zip(team_cols, TEAM_MEMBERS):
             unsafe_allow_html=True,
         )
 
-st.caption("Edit team details in config/project_data.py")
+st.caption("All team members contributed to the NLP pipeline, model development, model comparison, testing, and final system integration.")
 
 # --------------------------------------------------
 # Ethics & limitations
