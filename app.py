@@ -12,7 +12,7 @@ from config.project_data import (
 from services import ui_service as ui
 
 st.set_page_config(
-    page_title="NLP Sentiment Analyzer",
+    page_title="ThinkLab Sentiment Analyzer",
     page_icon="🧠",
     layout="wide",
     # Sidebar starts hidden; it opens by clicking the top-left brand bar
