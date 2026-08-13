@@ -740,10 +740,11 @@ def pipeline_html(steps):
 
             f'{icon}'
 
-            f'<span style="position:absolute;top:-7px;right:-7px;'
+            f'<span style="position:absolute;top:-8px;right:-8px;'
             f'background:{ACCENT};color:white;font-size:.65rem;'
-            f'font-weight:700;width:19px;height:19px;border-radius:50%;'
-            f'display:flex;align-items:center;justify-content:center">'
+            f'font-weight:700;width:20px;height:20px;border-radius:50%;'
+            f'display:flex;align-items:center;justify-content:center;'
+            f'z-index:2">'
             f'{index + 1}</span>'
 
             f'</div>'
@@ -757,11 +758,10 @@ def pipeline_html(steps):
 
     return (
         f'<div style="display:flex;align-items:flex-start;'
-        f'overflow-x:auto;gap:4px;color:inherit">'
+        f'overflow-x:auto;padding:12px 2px 5px;'
+        f'gap:4px;color:inherit">'
         f'{items}</div>'
     )
-
-
 def team_card_html(member):
     path = member.get("photo", "")
 
