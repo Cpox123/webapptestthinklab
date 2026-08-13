@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="260" height="48" viewBox="0 0 260 48">
+  <rect x="0" y="2" width="44" height="44" rx="12" fill="#2F66FF"/>
+  <circle cx="15" cy="19" r="4.2" fill="#FFFFFF"/>
+  <circle cx="29" cy="19" r="4.2" fill="#FFFFFF"/>
+  <path d="M12 29 Q22 36 32 29" stroke="#FFFFFF" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+  <text x="56" y="21" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="700" fill="#FFFFFF">NLP Sentiment</text>
+  <text x="56" y="39" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="700" fill="#8FB3FF">Analyzer</text>
+</svg>
