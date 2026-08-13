@@ -9,6 +9,7 @@ from config.project_data import (
 from services import ui_service as ui
 from services.bulk_service import predict_bulk
 
+
 ui.apply_theme()
 ui.render_brand()
 
@@ -25,7 +26,16 @@ UPLOAD_KEY = "bulk_uploader"
 
 
 # --------------------------------------------------
-# Upload zone (left) + requirements (right)
+# Helper: show footer before stopping the page
+# --------------------------------------------------
+
+def stop_with_footer():
+    ui.render_footer()
+    st.stop()
+
+
+# --------------------------------------------------
+# Upload zone
 # --------------------------------------------------
 
 upload_col, info_col = st.columns([1.45, 1.0], gap="large")
@@ -38,8 +48,6 @@ with upload_col:
         unsafe_allow_html=True,
     )
 
-    # Real text (not only inside the drop box) so the instructions are
-    # always visible on every screen size.
     st.markdown(
         f'<div style="color:{ui.TEXT_MUTED}; font-size:0.9rem; '
         f'margin-bottom:10px;">Drag &amp; drop your CSV file into the box '
@@ -62,10 +70,14 @@ with upload_col:
         "run predictions, and download the results."
     )
 
+
 with info_col:
 
     st.markdown(
-        ui.bulk_requirements_html(BULK_ROW_LIMIT, REVIEW_COLUMN_CANDIDATES),
+        ui.bulk_requirements_html(
+            BULK_ROW_LIMIT,
+            REVIEW_COLUMN_CANDIDATES,
+        ),
         unsafe_allow_html=True,
     )
 
@@ -74,43 +86,70 @@ with info_col:
         unsafe_allow_html=True,
     )
 
-st.divider()
 
-if uploaded_file is None:
-    # Reset state once nothing is uploaded
-    st.session_state.pop(STATE_KEY, None)
-    st.stop()
+st.divider()
 
 
 # --------------------------------------------------
-# Read the CSV robustly
+# Nothing uploaded
+# --------------------------------------------------
+
+if uploaded_file is None:
+
+    st.session_state.pop(STATE_KEY, None)
+
+    stop_with_footer()
+
+
+# --------------------------------------------------
+# Read CSV
 # --------------------------------------------------
 
 def read_csv_safely(file):
-    """Read an uploaded CSV, falling back to latin-1 for legacy encodings."""
+    """Read CSV with UTF-8 and Latin-1 fallback."""
 
     try:
-        return pd.read_csv(file, encoding="utf-8")
+        return pd.read_csv(
+            file,
+            encoding="utf-8",
+        )
 
     except UnicodeDecodeError:
+
         file.seek(0)
-        return pd.read_csv(file, encoding="latin-1")
+
+        return pd.read_csv(
+            file,
+            encoding="latin-1",
+        )
 
     except pd.errors.EmptyDataError:
-        st.error("The uploaded CSV file is empty.")
-        st.stop()
+
+        st.error(
+            "The uploaded CSV file is empty."
+        )
+
+        stop_with_footer()
 
     except pd.errors.ParserError:
-        st.error("The uploaded file is not a valid CSV.")
-        st.stop()
+
+        st.error(
+            "The uploaded file is not a valid CSV."
+        )
+
+        stop_with_footer()
 
 
 def find_review_column(df):
-    """Locate the review text column using the accepted names."""
+    """Find an accepted review text column."""
 
-    lookup = {str(column).strip().lower(): column for column in df.columns}
+    lookup = {
+        str(column).strip().lower(): column
+        for column in df.columns
+    }
 
     for candidate in REVIEW_COLUMN_CANDIDATES:
+
         if candidate.lower() in lookup:
             return lookup[candidate.lower()]
 
@@ -119,68 +158,139 @@ def find_review_column(df):
 
 df = read_csv_safely(uploaded_file)
 
+
+# --------------------------------------------------
+# Validate CSV
+# --------------------------------------------------
+
 if df.empty:
-    st.error("The uploaded CSV contains no data rows.")
-    st.stop()
+
+    st.error(
+        "The uploaded CSV contains no data rows."
+    )
+
+    stop_with_footer()
+
 
 # A new file invalidates previous results
 file_identity = f"{uploaded_file.name}-{len(df)}"
 
 previous = st.session_state.get(STATE_KEY)
 
-if previous is not None and previous["file_identity"] != file_identity:
+if (
+    previous is not None
+    and previous["file_identity"] != file_identity
+):
     st.session_state.pop(STATE_KEY)
+
     previous = None
 
 
 # --------------------------------------------------
-# Preview and validation
+# Preview
 # --------------------------------------------------
 
 st.subheader("CSV Preview")
-st.dataframe(df.head(), width="stretch", hide_index=True)
+
+st.dataframe(
+    df.head(),
+    width="stretch",
+    hide_index=True,
+)
+
 
 review_column = find_review_column(df)
+
 
 if review_column is None:
 
     st.error(
         "No review text column found. Your CSV must contain one of: "
-        + ", ".join(f"**{name}**" for name in REVIEW_COLUMN_CANDIDATES)
+        + ", ".join(
+            f"**{name}**"
+            for name in REVIEW_COLUMN_CANDIDATES
+        )
         + f". Found columns: {', '.join(df.columns)}"
     )
-    st.stop()
+
+    stop_with_footer()
+
 
 if review_column != REVIEW_COLUMN:
 
-    df = df.rename(columns={review_column: REVIEW_COLUMN})
-    st.caption(f"Using column **'{review_column}'** as the review text.")
+    df = df.rename(
+        columns={
+            review_column: REVIEW_COLUMN
+        }
+    )
 
-# Enforce the bulk row limit
+    st.caption(
+        f"Using column **'{review_column}'** "
+        f"as the review text."
+    )
+
+
+# --------------------------------------------------
+# Row limit
+# --------------------------------------------------
+
 if len(df) > BULK_ROW_LIMIT:
 
     st.warning(
-        f"The file contains {len(df)} reviews, which is more than the "
-        f"{BULK_ROW_LIMIT}-review bulk limit. Only the first "
-        f"{BULK_ROW_LIMIT} reviews will be classified."
+        f"The file contains {len(df)} reviews, "
+        f"which is more than the "
+        f"{BULK_ROW_LIMIT}-review bulk limit. "
+        f"Only the first {BULK_ROW_LIMIT} "
+        f"reviews will be classified."
     )
+
     df = df.head(BULK_ROW_LIMIT)
 
-# Clean the review column
-df[REVIEW_COLUMN] = df[REVIEW_COLUMN].fillna("").astype(str).str.strip()
 
-empty_count = int((df[REVIEW_COLUMN] == "").sum())
+# --------------------------------------------------
+# Clean reviews
+# --------------------------------------------------
+
+df[REVIEW_COLUMN] = (
+    df[REVIEW_COLUMN]
+    .fillna("")
+    .astype(str)
+    .str.strip()
+)
+
+empty_count = int(
+    (df[REVIEW_COLUMN] == "").sum()
+)
+
 valid_count = len(df) - empty_count
+
+
+# --------------------------------------------------
+# Dataset information
+# --------------------------------------------------
 
 st.subheader("Dataset Information")
 
 col1, col2, col3 = st.columns(3)
 
-col1.metric("Total Reviews", len(df))
-col2.metric("Valid Reviews", valid_count)
-col3.metric("Empty Reviews", empty_count)
+col1.metric(
+    "Total Reviews",
+    len(df),
+)
+
+col2.metric(
+    "Valid Reviews",
+    valid_count,
+)
+
+col3.metric(
+    "Empty Reviews",
+    empty_count,
+)
+
 
 if empty_count > 0:
+
     st.warning(
         f"{empty_count} empty review(s) found. "
         "They will be marked as 'Invalid review'."
@@ -188,7 +298,7 @@ if empty_count > 0:
 
 
 # --------------------------------------------------
-# Run prediction
+# Predict
 # --------------------------------------------------
 
 predict_clicked = st.button(
@@ -197,8 +307,13 @@ predict_clicked = st.button(
     disabled=(valid_count == 0),
 )
 
+
 if valid_count == 0:
-    st.error("There are no valid reviews to predict.")
+
+    st.error(
+        "There are no valid reviews to predict."
+    )
+
 
 if predict_clicked:
 
@@ -208,6 +323,7 @@ if predict_clicked:
     )
 
     def update_progress(done, total):
+
         progress_bar.progress(
             done / total,
             text=f"Classifying reviews... {done}/{total}",
@@ -223,11 +339,15 @@ if predict_clicked:
     result_df = df.copy()
 
     result_df["Predicted Sentiment"] = [
-        item["prediction"] for item in predictions
+        item["prediction"]
+        for item in predictions
     ]
 
     result_df["Confidence"] = [
-        round(item["confidence"], 4)
+        round(
+            item["confidence"],
+            4,
+        )
         if item["confidence"] is not None
         else None
         for item in predictions
@@ -236,7 +356,10 @@ if predict_clicked:
     counts = (
         result_df["Predicted Sentiment"]
         .value_counts()
-        .reindex(LABEL_ORDER, fill_value=0)
+        .reindex(
+            LABEL_ORDER,
+            fill_value=0,
+        )
     )
 
     st.session_state[STATE_KEY] = {
@@ -244,17 +367,25 @@ if predict_clicked:
         "result_df": result_df,
     }
 
-    # Shared with the Dashboard page
+    # Shared with Dashboard page
     st.session_state[COUNTS_KEY] = {
-        "Negative": int(counts["Negative"]),
-        "Neutral": int(counts["Neutral"]),
-        "Positive": int(counts["Positive"]),
-        "Total": int(counts.sum()),
+        "Negative": int(
+            counts["Negative"]
+        ),
+        "Neutral": int(
+            counts["Neutral"]
+        ),
+        "Positive": int(
+            counts["Positive"]
+        ),
+        "Total": int(
+            counts.sum()
+        ),
     }
 
 
 # --------------------------------------------------
-# Results (persist across reruns so the download works)
+# Results
 # --------------------------------------------------
 
 state = st.session_state.get(STATE_KEY)
@@ -266,45 +397,73 @@ if (
 
     result_df = state["result_df"]
 
-    st.subheader("Prediction Results")
+    st.subheader(
+        "Prediction Results"
+    )
 
     st.dataframe(
-        ui.style_results_table(result_df),
+        ui.style_results_table(
+            result_df
+        ),
         width="stretch",
         hide_index=True,
         column_config={
-            "Confidence": st.column_config.ProgressColumn(
-                "Confidence",
-                format="%.2f",
-                min_value=0.0,
-                max_value=1.0,
-            ),
+            "Confidence":
+                st.column_config.ProgressColumn(
+                    "Confidence",
+                    format="%.2f",
+                    min_value=0.0,
+                    max_value=1.0,
+                ),
         },
     )
 
-    # Distribution of valid predictions
+
+    # --------------------------------------------------
+    # Distribution
+    # --------------------------------------------------
+
     counts = (
         result_df["Predicted Sentiment"]
         .value_counts()
-        .reindex(LABEL_ORDER, fill_value=0)
+        .reindex(
+            LABEL_ORDER,
+            fill_value=0,
+        )
     )
 
-    total_valid = int(counts.sum())
+    total_valid = int(
+        counts.sum()
+    )
 
-    st.subheader("Sentiment Distribution")
+    st.subheader(
+        "Sentiment Distribution"
+    )
 
-    chart_left, chart_right = st.columns([1.0, 1.0], gap="large")
+    chart_left, chart_right = st.columns(
+        [1.0, 1.0],
+        gap="large",
+    )
+
 
     with chart_left:
 
         donut_parts = [
             (
                 label,
-                100.0 * int(counts[label]) / total_valid
+                (
+                    100.0
+                    * int(counts[label])
+                    / total_valid
+                )
                 if total_valid
                 else 0.0,
             )
-            for label in ["Positive", "Neutral", "Negative"]
+            for label in [
+                "Positive",
+                "Neutral",
+                "Negative",
+            ]
         ]
 
         st.markdown(
@@ -320,27 +479,41 @@ if (
             unsafe_allow_html=True,
         )
 
+
     with chart_right:
 
         st.markdown(
             ui.panel_html(
-                ui.vbar_chart_html(counts.to_dict()),
+                ui.vbar_chart_html(
+                    counts.to_dict()
+                ),
                 "Sentiment Counts",
                 "📊",
             ),
             unsafe_allow_html=True,
         )
 
-    # Download persists in session state, so it survives reruns.
-    # on_click="ignore" avoids a full page reload on download click.
-    csv_data = result_df.to_csv(index=False)
 
-    action_left, action_right = st.columns([1.0, 1.0])
+    # --------------------------------------------------
+    # Download
+    # --------------------------------------------------
+
+    csv_data = result_df.to_csv(
+        index=False
+    )
+
+    action_left, action_right = st.columns(
+        [1.0, 1.0]
+    )
+
 
     with action_left:
+
         st.download_button(
             "⬇️ Download Results CSV",
-            data=csv_data.encode("utf-8-sig"),
+            data=csv_data.encode(
+                "utf-8-sig"
+            ),
             file_name="sentiment_predictions.csv",
             mime="text/csv",
             type="primary",
@@ -349,30 +522,61 @@ if (
             width="stretch",
         )
 
+
     with action_right:
+
         clear_clicked = st.button(
             "🧹 Clear Results",
             width="stretch",
         )
 
+
     if clear_clicked:
-        st.session_state.pop(STATE_KEY, None)
-        st.session_state.pop(COUNTS_KEY, None)
-        st.session_state.pop(UPLOAD_KEY, None)
+
+        st.session_state.pop(
+            STATE_KEY,
+            None,
+        )
+
+        st.session_state.pop(
+            COUNTS_KEY,
+            None,
+        )
+
+        st.session_state.pop(
+            UPLOAD_KEY,
+            None,
+        )
+
         st.rerun()
 
+
     st.caption(
-        "If the download does not start (some embedded app previews block "
-        "downloads), open the app in a normal browser tab - or copy the CSV "
-        "from below."
+        "If the download does not start "
+        "(some embedded app previews block downloads), "
+        "open the app in a normal browser tab - "
+        "or copy the CSV from below."
     )
 
-    # Fallback that works even where file downloads are blocked
-    with st.expander("Copy the CSV manually"):
+
+    with st.expander(
+        "Copy the CSV manually"
+    ):
+
         st.write(
-            "Click the copy icon in the top-right corner of the box, then "
-            "paste into a file named sentiment_predictions.csv"
+            "Click the copy icon in the top-right "
+            "corner of the box, then paste into a "
+            "file named sentiment_predictions.csv"
         )
-        st.code(csv_data, language="csv")
+
+        st.code(
+            csv_data,
+            language="csv",
+        )
+
+
+# --------------------------------------------------
+# Footer
+# --------------------------------------------------
 
 ui.render_footer()
