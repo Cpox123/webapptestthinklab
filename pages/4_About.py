@@ -103,9 +103,13 @@ st.markdown(
 )
 
 team_cols = st.columns(len(TEAM_MEMBERS))
+
 for col, member in zip(team_cols, TEAM_MEMBERS):
     with col:
-        st.markdown(ui.team_card_html(member), unsafe_allow_html=True)
+        st.markdown(
+            ui.team_card_html(member),
+            unsafe_allow_html=True,
+        )
 
 st.caption("Edit team details in config/project_data.py")
 
