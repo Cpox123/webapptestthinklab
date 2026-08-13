@@ -167,14 +167,14 @@ def render_page_header(title, subtitle=None):
 
 
 def render_footer():
-    from config.project_data import COURSE, COPYRIGHT_YEAR, GROUP_NAME
+    from config.project_data import COPYRIGHT_YEAR
 
     st.write("")
 
     st.markdown(
         f'<div style="text-align:center;opacity:.60;font-size:.78rem;'
         f'padding:16px 0 5px;border-top:1px solid {BORDER}">'
-        f'© {COPYRIGHT_YEAR} {GROUP_NAME} | {COURSE}</div>',
+        f'© {COPYRIGHT_YEAR} ThinkLab Team. All rights reserved.</div>',
         unsafe_allow_html=True,
     )
 
