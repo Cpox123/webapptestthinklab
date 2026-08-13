@@ -116,19 +116,19 @@ TEAM_MEMBERS = [
     {
         "name": "Buddhisha Wijerathne (Leader)",
         "sid": "CIT-24-01-0118",
-        "role": "Data Preparation, App Integration & Deployment",
+        "role": "NLP Pipeline, Model Development, Data Preparation & Deployment",
         "photo": "assets/team/member1.jpeg",
     },
     {
         "name": "Shalitha Sachithra",
         "sid": "CIT-24-01-0084",
-        "role": "Model Evaluation, UI Design & App Development",
+        "role": "NLP Pipeline, Model Development, Evaluation & UI Development",
         "photo": "assets/team/member2.jpeg",
     },
     {
         "name": "Pawan Vihanga",
         "sid": "CIT-24-01-0459",
-        "role": "Model Testing, Documentation & App Development",
+        "role": "NLP Pipeline, Model Development, Testing & Documentation",
         "photo": "assets/team/member3.jpeg",
     },
 ]
