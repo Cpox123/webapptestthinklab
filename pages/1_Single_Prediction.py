@@ -12,7 +12,7 @@ ui.render_brand()
 # Page header
 ui.render_page_header(
     "Single Review Prediction",
-    "Enter a customer review and predict its sentiment.",
+    "Enter a product review to classify it as Positive, Neutral, or Negative.",
 )
 
 
@@ -26,7 +26,7 @@ review = st.text_area(
 
 # Prediction button
 if st.button(
-    "Predict Sentiment",
+    "🔍 Analyze Review",
     type="primary",
 ):
 
@@ -38,33 +38,50 @@ if st.button(
 
     else:
 
-        result = predict_sentiment(review)
+        st.session_state["single_result"] = predict_sentiment(review)
 
-        st.subheader(
-            "Prediction Result"
+
+# Prediction result
+result = st.session_state.get("single_result")
+
+if result:
+
+    st.subheader(
+        "Prediction Result"
+    )
+
+    if result == "Positive":
+
+        st.success(
+            "😊 Positive"
         )
 
-        if result == "Positive":
+    elif result == "Negative":
 
-            st.success(
-                "😊 Positive"
-            )
+        st.error(
+            "😞 Negative"
+        )
 
-        elif result == "Negative":
+    elif result == "Neutral":
 
-            st.error(
-                "😞 Negative"
-            )
+        st.info(
+            "😐 Neutral"
+        )
 
-        elif result == "Neutral":
+    else:
 
-            st.info(
-                "😐 Neutral"
-            )
+        st.warning(result)
 
-        else:
 
-            st.warning(result)
+    # Clear result
+    if st.button(
+        "🗑️ Clear Result"
+    ):
+        st.session_state.pop(
+            "single_result",
+            None,
+        )
+        st.rerun()
 
 
 # Footer
