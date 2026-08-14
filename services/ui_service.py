@@ -288,7 +288,10 @@ def stat_card_html(icon, label, value, sublabel, color):
 
 
 def render_stat_cards(cards):
-    for col, card in zip(st.columns(len(cards)), cards):
+    for col, card in zip(
+        st.columns(len(cards), gap="medium"),
+        cards
+    ):
         with col:
             st.markdown(
                 stat_card_html(*card),
