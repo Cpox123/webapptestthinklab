@@ -112,22 +112,22 @@ Observed output:
 
 ## 10. Final Regression Checklist
 
-- [ ] Open final deployed application in a fresh browser session.
-- [ ] Test a positive single review.
-- [ ] Test a negative single review.
-- [ ] Test a neutral single review.
-- [ ] Upload final sample CSV.
-- [ ] Run bulk prediction.
-- [ ] Verify result columns.
-- [ ] Verify confidence values.
-- [ ] Verify sentiment distribution charts.
-- [ ] Download result CSV.
-- [ ] Open Dashboard.
-- [ ] Open About.
-- [ ] Check light mode.
-- [ ] Check dark mode.
-- [ ] Confirm no visible Streamlit/Python errors.
-- [ ] Capture final testing screenshots for report/Git evidence.
+- [✅] Open final deployed application in a fresh browser session.
+- [✅] Test a positive single review.
+- [✅] Test a negative single review.
+- [✅] Test a neutral single review.
+- [✅] Upload final sample CSV.
+- [✅] Run bulk prediction.
+- [✅] Verify result columns.
+- [✅] Verify confidence values.
+- [✅] Verify sentiment distribution charts.
+- [✅] Download result CSV.
+- [✅] Open Dashboard.
+- [✅] Open About.
+- [✅] Check light mode.
+- [✅] Check dark mode.
+- [✅] Confirm no visible Streamlit/Python errors.
+- [✅] Capture final testing screenshots for report/Git evidence.
 
 ## 11. Known Limitations
 
