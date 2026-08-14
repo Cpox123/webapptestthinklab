@@ -203,25 +203,87 @@ def panel_html(body, title=None, icon=None):
 
 
 def stat_card_html(icon, label, value, sublabel, color):
-    return panel_html(
-        f'<div style="display:flex;align-items:center;gap:13px">'
 
-        f'<div style="width:44px;height:44px;min-width:44px;'
-        f'border-radius:10px;background:{_soft(color)};'
-        f'color:{color};font-size:1.3rem;display:flex;'
-        f'align-items:center;justify-content:center">{icon}</div>'
+    # Slightly reduce the value size when the text is long
+    value_size = "1.05rem" if len(str(value)) > 18 else "1.2rem"
 
-        f'<div>'
-        f'<div style="font-size:.78rem;opacity:.65;font-weight:600">'
-        f'{label}</div>'
+    return (
+        f'<div style="'
+        f'height:150px;'
+        f'box-sizing:border-box;'
+        f'display:flex;'
+        f'align-items:center;'
+        f'background:{CARD};'
+        f'border:1px solid {BORDER};'
+        f'border-radius:12px;'
+        f'padding:18px 20px;'
+        f'margin-bottom:13px;'
+        f'color:inherit;'
+        f'">'
 
-        f'<div style="font-size:1.2rem;font-weight:800">'
-        f'{value}</div>'
+        f'<div style="'
+        f'display:flex;'
+        f'align-items:center;'
+        f'gap:14px;'
+        f'width:100%;'
+        f'">'
 
-        f'<div style="font-size:.74rem;opacity:.65">'
-        f'{sublabel}</div>'
+        # Icon
+        f'<div style="'
+        f'width:46px;'
+        f'height:46px;'
+        f'min-width:46px;'
+        f'border-radius:11px;'
+        f'background:{_soft(color)};'
+        f'color:{color};'
+        f'font-size:1.3rem;'
+        f'display:flex;'
+        f'align-items:center;'
+        f'justify-content:center;'
+        f'">'
+        f'{icon}'
+        f'</div>'
 
-        f'</div></div>'
+        # Text section
+        f'<div style="'
+        f'flex:1;'
+        f'min-width:0;'
+        f'display:flex;'
+        f'flex-direction:column;'
+        f'justify-content:center;'
+        f'">'
+
+        f'<div style="'
+        f'font-size:.78rem;'
+        f'opacity:.65;'
+        f'font-weight:600;'
+        f'margin-bottom:5px;'
+        f'">'
+        f'{label}'
+        f'</div>'
+
+        f'<div style="'
+        f'font-size:{value_size};'
+        f'font-weight:800;'
+        f'line-height:1.25;'
+        f'word-break:normal;'
+        f'overflow-wrap:break-word;'
+        f'margin-bottom:6px;'
+        f'">'
+        f'{value}'
+        f'</div>'
+
+        f'<div style="'
+        f'font-size:.74rem;'
+        f'opacity:.65;'
+        f'line-height:1.25;'
+        f'">'
+        f'{sublabel}'
+        f'</div>'
+
+        f'</div>'
+        f'</div>'
+        f'</div>'
     )
 
 
