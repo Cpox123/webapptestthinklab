@@ -204,28 +204,20 @@ def panel_html(body, title=None, icon=None):
 
 def stat_card_html(icon, label, value, sublabel, color):
 
-    # Slightly reduce the value size when the text is long
     value_size = "1.05rem" if len(str(value)) > 18 else "1.2rem"
 
     return (
         f'<div style="'
-        f'height:150px;'
         f'box-sizing:border-box;'
-        f'display:flex;'
-        f'align-items:center;'
+        f'min-height:140px;'
         f'background:{CARD};'
         f'border:1px solid {BORDER};'
         f'border-radius:12px;'
-        f'padding:18px 20px;'
-        f'margin-bottom:13px;'
-        f'color:inherit;'
-        f'">'
-
-        f'<div style="'
+        f'padding:18px;'
         f'display:flex;'
         f'align-items:center;'
         f'gap:14px;'
-        f'width:100%;'
+        f'color:inherit;'
         f'">'
 
         # Icon
@@ -244,13 +236,10 @@ def stat_card_html(icon, label, value, sublabel, color):
         f'{icon}'
         f'</div>'
 
-        # Text section
+        # Text
         f'<div style="'
         f'flex:1;'
-        f'min-width:0;'
-        f'display:flex;'
-        f'flex-direction:column;'
-        f'justify-content:center;'
+        f'min-width:120px;'
         f'">'
 
         f'<div style="'
@@ -265,10 +254,10 @@ def stat_card_html(icon, label, value, sublabel, color):
         f'<div style="'
         f'font-size:{value_size};'
         f'font-weight:800;'
-        f'line-height:1.25;'
+        f'line-height:1.3;'
+        f'margin-bottom:5px;'
         f'word-break:normal;'
-        f'overflow-wrap:break-word;'
-        f'margin-bottom:6px;'
+        f'overflow-wrap:normal;'
         f'">'
         f'{value}'
         f'</div>'
@@ -276,27 +265,40 @@ def stat_card_html(icon, label, value, sublabel, color):
         f'<div style="'
         f'font-size:.74rem;'
         f'opacity:.65;'
-        f'line-height:1.25;'
+        f'line-height:1.3;'
         f'">'
         f'{sublabel}'
         f'</div>'
 
         f'</div>'
         f'</div>'
-        f'</div>'
     )
 
 
 def render_stat_cards(cards):
-    for col, card in zip(
-        st.columns(len(cards), gap="medium"),
-        cards
-    ):
-        with col:
-            st.markdown(
-                stat_card_html(*card),
-                unsafe_allow_html=True,
-            )
+
+    cards_html = "".join(
+        stat_card_html(*card)
+        for card in cards
+    )
+
+    st.markdown(
+        f'''
+        <div style="
+            display:grid;
+            grid-template-columns:repeat(
+                auto-fit,
+                minmax(230px, 1fr)
+            );
+            gap:16px;
+            width:100%;
+            align-items:stretch;
+        ">
+            {cards_html}
+        </div>
+        ''',
+        unsafe_allow_html=True,
+    )
 
 
 # ==================================================
