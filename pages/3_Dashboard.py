@@ -11,10 +11,15 @@ from services import ui_service as ui
 ui.apply_theme()
 ui.render_brand()
 
+
+# --------------------------------------------------
+# Header
+# --------------------------------------------------
+
 ui.render_page_header(
     "Analytics Dashboard",
-    "Compare all evaluated models and explore sentiment analytics "
-    "from bulk predictions.",
+    "Compare all evaluated models, understand the final model selection, "
+    "and explore sentiment analytics from bulk predictions.",
 )
 
 
@@ -24,9 +29,14 @@ ui.render_page_header(
 
 st.markdown(
     ui.panel_html(
-        "This dashboard compares all six Machine Learning and Deep "
-        "Learning models using Accuracy and Macro F1. It also shows "
-        "sentiment statistics generated from Bulk Prediction results.",
+        f'<div style="font-size:0.92rem; line-height:1.7; '
+        f'color:{ui.TEXT_MUTED};">'
+        "This dashboard summarizes the evaluation of all "
+        "<b>six Machine Learning and Deep Learning models</b>. "
+        "Accuracy shows overall prediction correctness, while "
+        "<b>Macro F1</b> gives equal importance to Positive, Neutral, "
+        "and Negative sentiment classes."
+        "</div>",
         "Dashboard Overview",
         "💡",
     ),
@@ -35,13 +45,19 @@ st.markdown(
 
 
 # --------------------------------------------------
-# Model highlights
+# Find key models
 # --------------------------------------------------
 
 ml_models = {
     name: result
     for name, result in MODEL_RESULTS.items()
     if MODEL_TYPES[name] == "ML"
+}
+
+dl_models = {
+    name: result
+    for name, result in MODEL_RESULTS.items()
+    if MODEL_TYPES[name] == "DL"
 }
 
 highest_accuracy = max(
@@ -54,8 +70,19 @@ best_ml = max(
     key=lambda name: ml_models[name]["macro_f1"],
 )
 
+best_dl = max(
+    dl_models,
+    key=lambda name: dl_models[name]["macro_f1"],
+)
+
 final = MODEL_RESULTS[FINAL_MODEL_NAME]
 
+
+# --------------------------------------------------
+# Key highlights
+# --------------------------------------------------
+
+st.subheader("Key Model Highlights")
 
 ui.render_stat_cards(
     [
@@ -63,7 +90,7 @@ ui.render_stat_cards(
             "🏆",
             "Highest Accuracy",
             highest_accuracy,
-            f"{MODEL_RESULTS[highest_accuracy]['accuracy'] * 100:.2f}%",
+            f"{MODEL_RESULTS[highest_accuracy]['accuracy'] * 100:.2f}% accuracy",
             ui.METRIC_COLORS["blue"],
         ),
         (
@@ -75,9 +102,9 @@ ui.render_stat_cards(
         ),
         (
             "🤖",
-            "Best DL / Final Model",
-            FINAL_MODEL_NAME,
-            f"Macro F1: {final['macro_f1']:.4f}",
+            "Best DL & Final Model",
+            best_dl,
+            f"Macro F1: {dl_models[best_dl]['macro_f1']:.4f}",
             ui.METRIC_COLORS["green"],
         ),
     ]
@@ -87,36 +114,133 @@ st.write("")
 
 
 # --------------------------------------------------
-# Model performance comparison
+# Model comparison
 # --------------------------------------------------
+
+st.subheader("Model Performance Comparison")
+
+st.caption(
+    "Blue bars represent Accuracy and cyan bars represent Macro F1. "
+    "The ⭐ indicates the final selected model."
+)
+
+# Better visual ordering: ML models first, then DL models
+comparison_order = [
+    "Logistic Regression",
+    "Naive Bayes",
+    "SVM",
+    "LSTM",
+    "CNN",
+    "BERT",
+]
+
+comparison_results = {
+    model: MODEL_RESULTS[model]
+    for model in comparison_order
+    if model in MODEL_RESULTS
+}
 
 st.markdown(
     ui.panel_html(
         ui.model_comparison_html(
-            MODEL_RESULTS,
+            comparison_results,
             FINAL_MODEL_NAME,
         ),
-        "Model Performance Comparison",
+        "All Six Evaluated Models",
         "📈",
     ),
     unsafe_allow_html=True,
 )
 
 
-st.info(
-    f"📌 **{highest_accuracy}** achieved the highest accuracy at "
-    f"**{MODEL_RESULTS[highest_accuracy]['accuracy'] * 100:.2f}%**, "
-    f"while **{FINAL_MODEL_NAME}** achieved the highest Macro F1 "
-    f"score of **{final['macro_f1']:.4f}**. Because the dataset is "
-    f"imbalanced, BERT was selected as the final model."
+# --------------------------------------------------
+# Final model explanation
+# --------------------------------------------------
+
+st.markdown(
+    ui.panel_html(
+        f'<div style="display:flex; align-items:flex-start; gap:14px;">'
+
+        f'<div style="font-size:2rem;">⭐</div>'
+
+        f'<div>'
+
+        f'<div style="font-weight:800; font-size:1rem; '
+        f'margin-bottom:6px;">'
+        f"Why {FINAL_MODEL_NAME} Was Selected"
+        f"</div>"
+
+        f'<div style="font-size:0.88rem; line-height:1.7; '
+        f'color:{ui.TEXT_MUTED};">'
+
+        f"<b>{highest_accuracy}</b> achieved the highest overall "
+        f"accuracy at "
+        f"<b>{MODEL_RESULTS[highest_accuracy]['accuracy'] * 100:.2f}%</b>. "
+
+        f"However, <b>{FINAL_MODEL_NAME}</b> achieved the highest "
+        f"Macro F1 score of "
+        f"<b>{final['macro_f1']:.4f}</b> with an accuracy of "
+        f"<b>{final['accuracy'] * 100:.2f}%</b>. "
+
+        f"Because the dataset is strongly imbalanced, Macro F1 was "
+        f"considered more important for balanced performance across "
+        f"all three sentiment classes. Therefore, "
+        f"<b>{FINAL_MODEL_NAME}</b> was selected as the final model."
+
+        f"</div>"
+        f"</div>"
+        f"</div>",
+        "Final Model Selection",
+        "🏆",
+    ),
+    unsafe_allow_html=True,
 )
+
+
+# --------------------------------------------------
+# Exact metrics
+# --------------------------------------------------
+
+with st.expander("📋 View Exact Model Metrics"):
+
+    metrics_table = []
+
+    for model in comparison_order:
+
+        if model not in MODEL_RESULTS:
+            continue
+
+        result = MODEL_RESULTS[model]
+
+        metrics_table.append(
+            {
+                "Model": model,
+                "Type": MODEL_TYPES[model],
+                "Accuracy": f"{result['accuracy'] * 100:.2f}%",
+                "Macro F1": f"{result['macro_f1']:.4f}",
+                "Final Model": "Yes" if model == FINAL_MODEL_NAME else "",
+            }
+        )
+
+    st.dataframe(
+        metrics_table,
+        width="stretch",
+        hide_index=True,
+    )
 
 
 # --------------------------------------------------
 # Live prediction analytics
 # --------------------------------------------------
 
+st.divider()
+
 st.subheader("Live Prediction Analytics")
+
+st.caption(
+    "These statistics are generated from Bulk Prediction results "
+    "during the current application session."
+)
 
 counts = st.session_state.get("bulk_counts")
 
@@ -124,9 +248,16 @@ counts = st.session_state.get("bulk_counts")
 if not counts:
 
     st.info(
-        "💡 No bulk predictions yet. Run a **Bulk CSV Prediction** "
-        "to display session analytics here."
+        "💡 No bulk prediction results are available yet. "
+        "Run a Bulk CSV Prediction to generate live sentiment analytics."
     )
+
+    st.page_link(
+        "pages/2_Bulk_Prediction.py",
+        label="Go to Bulk Prediction →",
+        icon="📂",
+    )
+
 
 else:
 
@@ -135,8 +266,10 @@ else:
     neutral = counts["Neutral"]
     negative = counts["Negative"]
 
+
     def share(value):
         return f"{(100 * value / total) if total else 0:.2f}%"
+
 
     ui.render_stat_cards(
         [
@@ -178,12 +311,22 @@ else:
         gap="large",
     )
 
+
     with donut_col:
 
         parts = [
-            ("Positive", 100 * positive / total if total else 0),
-            ("Neutral", 100 * neutral / total if total else 0),
-            ("Negative", 100 * negative / total if total else 0),
+            (
+                "Positive",
+                100 * positive / total if total else 0,
+            ),
+            (
+                "Neutral",
+                100 * neutral / total if total else 0,
+            ),
+            (
+                "Negative",
+                100 * negative / total if total else 0,
+            ),
         ]
 
         st.markdown(
@@ -198,6 +341,7 @@ else:
             ),
             unsafe_allow_html=True,
         )
+
 
     with bar_col:
 
@@ -216,5 +360,38 @@ else:
             unsafe_allow_html=True,
         )
 
+
+    # --------------------------------------------------
+    # Quick session insight
+    # --------------------------------------------------
+
+    sentiment_counts = {
+        "Positive": positive,
+        "Neutral": neutral,
+        "Negative": negative,
+    }
+
+    dominant_sentiment = max(
+        sentiment_counts,
+        key=sentiment_counts.get,
+    )
+
+    dominant_share = (
+        100 * sentiment_counts[dominant_sentiment] / total
+        if total
+        else 0
+    )
+
+    st.info(
+        f"📌 **Session Insight:** "
+        f"**{dominant_sentiment}** is the most common predicted "
+        f"sentiment, representing **{dominant_share:.2f}%** "
+        f"of the {total:,} analyzed reviews."
+    )
+
+
+# --------------------------------------------------
+# Footer
+# --------------------------------------------------
 
 ui.render_footer()
