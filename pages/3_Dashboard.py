@@ -227,7 +227,52 @@ with st.expander("📋 View Exact Model Metrics"):
         width="stretch",
         hide_index=True,
     )
+# --------------------------------------------------
+# Detailed model evaluation
+# --------------------------------------------------
 
+with st.expander("🔎 Detailed Model Evaluation"):
+
+    st.caption(
+        "Confusion matrices show how the two strongest models classified "
+        "Negative, Neutral, and Positive reviews on the test set."
+    )
+
+    bert_col, svm_col = st.columns(2, gap="large")
+
+    with bert_col:
+
+        st.markdown("#### 🤖 BERT — Final Model")
+
+        st.image(
+            "assets/evaluation/bert_confusion_matrix.png",
+            use_container_width=True,
+        )
+
+        st.caption(
+            "BERT was selected as the final model because it achieved "
+            "the highest Macro F1 score of 0.6600."
+        )
+
+    with svm_col:
+
+        st.markdown("#### 🏆 SVM — Highest Accuracy")
+
+        st.image(
+            "assets/evaluation/svm_confusion_matrix.png",
+            use_container_width=True,
+        )
+
+        st.caption(
+            "SVM achieved the highest overall accuracy at 82.06%, "
+            "but its Macro F1 score was lower than BERT."
+        )
+
+    st.info(
+        "📌 BERT provides the stronger balanced performance across the "
+        "three sentiment classes, while SVM provides the highest overall "
+        "accuracy."
+    )
 
 # --------------------------------------------------
 # Live prediction analytics
