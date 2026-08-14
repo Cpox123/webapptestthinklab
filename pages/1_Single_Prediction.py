@@ -26,7 +26,7 @@ review = st.text_area(
 
 # Prediction button
 if st.button(
-    "🔍 Analyze Review",
+    "🔍Analyze Review",
     type="primary",
 ):
 
