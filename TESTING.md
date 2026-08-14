@@ -150,18 +150,4 @@ Main testing areas:
 - Testing documentation
 - Final regression testing
 
-## 13. Suggested Git Commits
 
-Use these only when the related work was genuinely completed:
-
-```text
-Test single review prediction with multiple sentiment cases
-Validate bulk CSV prediction with valid and invalid inputs
-Test empty reviews and unsupported CSV column handling
-Verify bulk row limit and prediction output consistency
-Check light and dark theme readability across app pages
-Test dashboard updates after bulk sentiment prediction
-Update testing notes and application validation documentation
-```
-
-Do not create empty commits only to increase commit history.
